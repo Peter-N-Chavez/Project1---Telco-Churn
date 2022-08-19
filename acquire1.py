@@ -16,7 +16,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
-from acquire import *
+from sklearn.feature_selection import chi2
 from prepare import *
 from explore import *
 import env

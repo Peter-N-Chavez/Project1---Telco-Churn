@@ -16,9 +16,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
+from sklearn.feature_selection import chi2
 from acquire import *
 from prepare import *
-from explore import *
 import env
 
 def dtypes_to_list(df):
@@ -54,42 +54,28 @@ def cat_vis(train, cat_type_list):
     used_columns = cat_type_list
     df = df.loc[:, used_columns]
 
-    df.columns = df.columns.map(" ".join)
-
-    corr_mat = df.corr().stack().reset_index(name="correlation")
-
-    g = sns.relplot(
-        data=corr_mat,
-        x="level_0", y="level_1", hue="correlation", size="correlation",
-        palette="vlag", hue_norm=(-1, 1), edgecolor=".7",
-        height=12, sizes=(100, 250), size_norm=(-.2, .8),
-    )
-
-    g.set(xlabel="", ylabel="", aspect="equal")
-    g.despine(left=True, bottom=True)
-    g.ax.margins(.02)
-    for label in g.ax.get_xticklabels():
-        label.set_rotation(90)
-    for artist in g.legend.legendHandles:
-        artist.set_edgecolor(".7")
+    plt.figure(figsize=(16, 6))
+    mask = np.triu(np.ones_like(df.corr(), dtype=np.bool))
+    heatmap = sns.heatmap(df.corr(), mask=mask, vmin=-1, vmax=1, annot=True, cmap='Spectral')
+    heatmap.set_title('Triangle Correlation Heatmap', fontdict={'fontsize':18}, pad=16)
     
 def cat_test(train, target, cat_type_list):
     
     for col in cat_type_list:
-
-        α = 0.05
-        null_hyp = col + " and " + target + " are independent."
-        alt_hyp = "There appears to be a relationship between " + target + " and " + col + "."
-        observed = pd.crosstab(train[target], train[col])
-        chi2, p, degf, expected = stats.chi2_contingency(observed)
-        if p < α:
-            print("We reject the null hypothesis that", null_hyp)
-            print(alt_hyp)
-            print()
-        else:
-            print("We fail to reject the null hypothesis that", null_hyp)
-            print("There appears to be no relationship between ", target, "and ", col, ".")
-            print()
+        if col != target:
+            α = 0.05
+            null_hyp = col + " and " + target + " are independent."
+            alt_hyp = "There appears to be a relationship between " + target + " and " + col + "."
+            observed = pd.crosstab(train[target], train[col])
+            chi2, p, degf, expected = stats.chi2_contingency(observed)
+            if p < α:
+                print("We reject the null hypothesis that", null_hyp)
+                print(alt_hyp)
+                print()
+            else:
+                print("We fail to reject the null hypothesis that", null_hyp)
+                print("There appears to be no relationship between ", target, "and ", col, ".")
+                print()
 
 def cat_analysis(train, target, cat_type_list):
 
