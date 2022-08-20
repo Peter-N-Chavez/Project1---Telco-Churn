@@ -17,14 +17,14 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.feature_selection import chi2
-from acquire import *
-from explore import *
+from acquire1 import *
+from explore1 import *
 import env
 import os
 
 def prep_telco(telco):
 
-    telco = get_telco_data()
+    df = telco
 
     telco = telco.drop(columns=["internet_service_type_id", "contract_type_id", "payment_type_id"])
 
